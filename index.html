@@ -13,104 +13,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
+<link rel="stylesheet" href="styles.css">
 <style>
-:root{
-  --bg:#050505; --panel:rgba(255,255,255,.03); --panel2:rgba(255,255,255,.05);
-  --blue:#3B82F6; --blue-bright:#8AB6FF; --gold:#FFD24D; --violet:#8B5CF6;
-  --text:#F4F5F7; --muted:#A6ADBA; --faint:#5B6470;
-  --radius:24px; --border:1px solid rgba(255,255,255,.09);
-  --grad:linear-gradient(120deg,#3B82F6 0%,#8B5CF6 48%,#FFD24D 100%);
-  --font-d:'Space Grotesk',sans-serif; --font-b:'Inter',sans-serif; --font-s:'Cormorant Garamond',serif;
-  --ease:cubic-bezier(.22,1,.36,1);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:auto}
-html.lenis,html.lenis body{height:auto}
-.lenis.lenis-smooth{scroll-behavior:auto!important}
-body{background:var(--bg);color:var(--text);font-family:var(--font-b);overflow-x:hidden;line-height:1.65}
-::selection{background:var(--blue);color:#fff}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-button{font:inherit}
-
-/* film grain + progress */
-#grain{position:fixed;inset:-60px;z-index:96;pointer-events:none;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 1.4s steps(4) infinite}
-@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-14px,10px)}50%{transform:translate(10px,-12px)}75%{transform:translate(-8px,-8px)}100%{transform:translate(12px,10px)}}
-#prog{position:fixed;top:0;left:0;height:2px;width:0;background:var(--grad);z-index:200;box-shadow:0 0 14px rgba(59,130,246,.7)}
-
-/* custom cursor */
-#cur,#curDot{position:fixed;top:0;left:0;pointer-events:none;z-index:300;border-radius:50%;mix-blend-mode:difference}
-#cur{width:38px;height:38px;border:1.5px solid rgba(255,255,255,.75);transition:width .35s var(--ease),height .35s var(--ease),opacity .3s;margin:-19px 0 0 -19px}
-#curDot{width:5px;height:5px;background:#fff;margin:-2.5px 0 0 -2.5px}
-#cur.big{width:74px;height:74px;margin:-37px 0 0 -37px}
-@media(hover:none),(pointer:coarse){#cur,#curDot{display:none}}
-
-/* preloader */
-#loader{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:26px;transition:clip-path 1.1s var(--ease)}
-#loader.lift{clip-path:inset(0 0 100% 0)}
-#loader .word{display:flex;overflow:hidden}
-#loader .word span{font-family:var(--font-d);font-weight:700;font-size:clamp(40px,9vw,88px);letter-spacing:.06em;display:inline-block;transform:translateY(115%);animation:lup .9s var(--ease) forwards}
-#loader .word span:nth-child(2){animation-delay:.07s;color:var(--blue-bright)}
-#loader .word span:nth-child(3){animation-delay:.14s;color:var(--violet)}
-#loader .word span:nth-child(4){animation-delay:.21s;color:var(--gold)}
-@keyframes lup{to{transform:none}}
-#loader .motto{font-family:var(--font-s);font-style:italic;font-size:clamp(15px,2vw,19px);color:var(--gold);opacity:0;animation:fadeIn 1.2s .8s forwards}
-@keyframes fadeIn{to{opacity:.9}}
-#loader .pct{font-family:var(--font-d);font-size:13px;letter-spacing:.5em;color:var(--faint)}
-#loader .bar{width:min(240px,40vw);height:1.5px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
-#loader .bar i{display:block;height:100%;width:0;background:var(--grad);transition:width .2s linear}
-
-/* background fx */
-.aurora{position:fixed;border-radius:50%;filter:blur(130px);z-index:0;pointer-events:none;will-change:transform}
-.aurora.a1{width:55vw;height:55vw;background:#163a8f;top:-18vw;left:-14vw;opacity:.5}
-.aurora.a2{width:46vw;height:46vw;background:#5b21b6;top:38vh;right:-18vw;opacity:.34}
-.aurora.a3{width:38vw;height:38vw;background:#7a5808;bottom:-16vw;left:24vw;opacity:.2}
-.mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(80% 60% at 50% 0%,#000 10%,transparent 78%)}
-
-/* nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:150;display:flex;align-items:center;justify-content:space-between;padding:20px clamp(20px,5vw,64px);transition:transform .55s var(--ease),background .4s,border-color .4s;border-bottom:1px solid transparent}
-nav.scrolled{background:rgba(5,5,5,.68);backdrop-filter:blur(20px);border-color:rgba(255,255,255,.07)}
-nav.hide{transform:translateY(-110%)}
-.brand{display:flex;align-items:center;gap:12px}
-.brand img{width:40px;height:40px;border-radius:11px;transition:transform .5s var(--ease)}
-.brand:hover img{transform:rotate(-8deg) scale(1.08)}
-.brand b{font-family:var(--font-d);font-size:19px;letter-spacing:.16em}
-.nav-links{display:flex;gap:34px;font-size:14.5px;color:var(--muted)}
-.nav-links a{position:relative;transition:color .3s;padding:4px 0}
-.nav-links a::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:1.5px;background:var(--grad);transform:scaleX(0);transform-origin:right;transition:transform .45s var(--ease)}
-.nav-links a:hover{color:#fff}
-.nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
-.nav-cta{font-family:var(--font-d);font-size:13.5px;font-weight:600;padding:11px 24px;border-radius:999px;border:var(--border);background:var(--panel);color:var(--text);transition:.35s;cursor:pointer}
-.nav-cta:hover{border-color:rgba(138,182,255,.55);background:rgba(59,130,246,.13);box-shadow:0 0 28px rgba(59,130,246,.25)}
-#burger{display:none;flex-direction:column;gap:5.5px;background:none;border:none;cursor:pointer;padding:6px;z-index:160}
-#burger i{width:24px;height:2px;background:var(--text);transition:.4s var(--ease);display:block;border-radius:2px}
-#burger.open i:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
-#burger.open i:nth-child(2){opacity:0;transform:scaleX(0)}
-#burger.open i:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
-
-/* shared */
-section{position:relative;z-index:1;padding:clamp(90px,13vh,150px) clamp(20px,6vw,90px);max-width:1280px;margin:0 auto}
-.eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:12.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--blue-bright);font-weight:600;margin-bottom:24px}
-.eyebrow::before{content:"";width:36px;height:1.5px;background:var(--grad);border-radius:2px}
-h2{font-family:var(--font-d);font-size:clamp(36px,5vw,62px);line-height:1.06;font-weight:700;letter-spacing:-.015em;margin-bottom:20px}
-.grad-text{background:var(--grad);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradShift 6s ease-in-out infinite alternate}
-@keyframes gradShift{to{background-position:100% center}}
-.gold-text{color:var(--gold)}
-.sub{color:var(--muted);font-size:clamp(15px,1.4vw,18px);max-width:640px}
-.motto-line{font-family:var(--font-s);font-style:italic;font-size:clamp(16px,1.8vw,21px);color:var(--gold);letter-spacing:.02em}
-
-/* line mask reveal */
-.mask{display:block;overflow:hidden}
-.mask>span{display:block;transform:translateY(112%);transition:transform 1.15s var(--ease)}
-.in .mask>span{transform:none}
-.m2 .mask:nth-child(2)>span{transition-delay:.1s}.m3 .mask:nth-child(3)>span{transition-delay:.2s}
-
-/* fade reveal */
-.rv{opacity:0;transform:translateY(40px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
-.rv.in{opacity:1;transform:none}
-.rv.d1{transition-delay:.12s}.rv.d2{transition-delay:.24s}.rv.d3{transition-delay:.36s}.rv.d4{transition-delay:.48s}
-
-/* hero */
 .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:150px clamp(20px,6vw,90px) 70px;max-width:1280px;margin:0 auto;position:relative;z-index:1}
 .hero-visual{position:absolute;right:-6vw;top:12vh;width:min(52vw,760px);z-index:-1;opacity:.42;filter:saturate(1.15);mask-image:radial-gradient(closest-side,#000 26%,transparent 90%);will-change:transform}
 .hero h1{font-family:var(--font-d);font-weight:700;font-size:clamp(46px,8.6vw,118px);line-height:1.01;letter-spacing:-.03em;margin:10px 0 26px}
@@ -126,157 +30,10 @@ h2{font-family:var(--font-d);font-size:clamp(36px,5vw,62px);line-height:1.06;fon
 .hero .lead strong{color:var(--text)}
 .hero-btns{display:flex;gap:16px;flex-wrap:wrap;opacity:0;transform:translateY(26px);transition:opacity 1s var(--ease) .65s,transform 1s var(--ease) .65s}
 .hero.play .hero-btns{opacity:1;transform:none}
-.btn{position:relative;display:inline-flex;align-items:center;gap:10px;font-family:var(--font-d);font-weight:600;font-size:15px;padding:16px 36px;border-radius:999px;transition:transform .5s var(--ease),box-shadow .5s var(--ease),background-position .6s;cursor:pointer;border:none;will-change:transform}
-.btn.primary{background:var(--grad);background-size:200% auto;color:#050505;box-shadow:0 10px 44px rgba(59,130,246,.35)}
-.btn.primary:hover{background-position:100% center;box-shadow:0 18px 64px rgba(139,92,246,.5)}
-.btn.primary::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.55) 50%,transparent 62%);translate:-120% 0;transition:translate .9s var(--ease)}
-.btn.primary:hover::after{translate:120% 0}
-.btn.ghost{background:var(--panel);border:var(--border);color:var(--text);backdrop-filter:blur(10px)}
-.btn.ghost:hover{border-color:rgba(255,210,77,.5);box-shadow:0 0 34px rgba(255,210,77,.16)}
 .scroll-hint{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);color:var(--faint);font-size:11.5px;letter-spacing:.34em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transition:opacity 1s 1.2s}
 .scroll-hint.in{opacity:1}
 .scroll-hint::after{content:"";width:1px;height:48px;background:linear-gradient(var(--blue),transparent);animation:drop 1.9s var(--ease) infinite}
 @keyframes drop{0%{transform:scaleY(0);transform-origin:top}55%{transform:scaleY(1);transform-origin:top}56%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
-
-/* ticker */
-.ticker{position:relative;z-index:1;border-top:var(--border);border-bottom:var(--border);padding:22px 0;overflow:hidden;background:rgba(255,255,255,.015)}
-.ticker-track{display:flex;gap:64px;width:max-content;animation:scrollX 34s linear infinite;white-space:nowrap}
-.ticker:hover .ticker-track{animation-play-state:paused}
-.ticker-track span{font-family:var(--font-d);font-size:15px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:64px;transition:color .3s}
-.ticker-track span:hover{color:var(--gold)}
-.ticker-track span::after{content:"◆";color:var(--gold);font-size:10px;opacity:.65}
-@keyframes scrollX{to{transform:translateX(-50%)}}
-
-/* welcome (scroll-lit words) */
-.mani{max-width:1040px}
-.mani p{font-family:var(--font-d);font-size:clamp(24px,3.4vw,44px);line-height:1.42;font-weight:500;letter-spacing:-.01em}
-.mani p .w{opacity:.13;transition:opacity .5s ease}
-.mani p .w.lit{opacity:1}
-.mani p em{font-style:normal;background:var(--grad);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.mani .gap{display:block;height:34px}
-.verse{margin-top:54px;display:flex;gap:22px;align-items:flex-start;max-width:720px}
-.verse::before{content:"❝";font-family:var(--font-s);font-size:54px;color:var(--gold);line-height:.6}
-.verse blockquote{font-family:var(--font-s);font-style:italic;font-size:clamp(18px,2vw,23px);color:var(--text);opacity:.9}
-.verse cite{display:block;margin-top:10px;font-family:var(--font-d);font-style:normal;font-size:12.5px;letter-spacing:.28em;color:var(--faint);text-transform:uppercase}
-
-/* vision/mission */
-.vm{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:56px}
-.vm .panel{position:relative;background:var(--panel);border:var(--border);border-radius:var(--radius);padding:clamp(30px,4vw,46px);overflow:hidden;transition:transform .5s var(--ease),border-color .4s,box-shadow .5s}
-.vm .panel:hover{transform:translateY(-6px);border-color:rgba(255,210,77,.35);box-shadow:0 24px 60px rgba(0,0,0,.45)}
-.vm .panel::before{content:"";position:absolute;top:0;left:0;width:100%;height:2px;background:var(--grad)}
-.vm .panel.v{--accent:var(--blue-bright)}.vm .panel.m{--accent:var(--gold)}
-.vm .k{font-family:var(--font-d);font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-bottom:16px}
-.vm h3{font-family:var(--font-d);font-size:clamp(24px,2.6vw,32px);margin-bottom:14px;color:var(--accent)}
-.vm p{color:var(--muted);font-size:16px}
-
-/* letter cards (name & goals) */
-.stack{position:relative;z-index:1;margin-top:70px;display:flex;flex-direction:column;gap:26px}
-.stack .sp{position:sticky;top:calc(88px + var(--i)*14px)}
-.vcard{position:relative;background:linear-gradient(160deg,rgba(20,22,28,.92),rgba(10,11,14,.94));border:var(--border);border-radius:var(--radius);padding:clamp(28px,4vw,46px);display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,4vw,44px);align-items:center;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);will-change:transform;transition:box-shadow .5s}
-.vcard::before{content:"";position:absolute;inset:0;background:radial-gradient(680px circle at var(--mx,50%) var(--my,0%),rgba(59,130,246,.15),transparent 44%);opacity:0;transition:opacity .5s}
-.vcard:hover::before{opacity:1}
-.vcard .bigletter{font-family:var(--font-d);font-weight:700;font-size:clamp(88px,14vw,170px);line-height:1;background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.015));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;user-select:none}
-.vcard .num{font-family:var(--font-d);font-size:12px;color:var(--faint);letter-spacing:.24em;margin-bottom:14px}
-.vcard h3{font-family:var(--font-d);font-size:clamp(24px,3vw,36px);margin-bottom:12px;letter-spacing:-.01em}
-.vcard p{color:var(--muted);font-size:15px;max-width:680px;margin-bottom:18px}
-.chips{display:flex;flex-wrap:wrap;gap:9px}
-.chip{font-size:11px;letter-spacing:.1em;padding:7px 15px;border-radius:999px;border:var(--border);color:var(--blue-bright);background:rgba(59,130,246,.07);transition:.3s}
-.vcard:hover .chip{border-color:rgba(138,182,255,.3)}
-.chip.gold{color:var(--gold);background:rgba(255,210,77,.07)}
-
-/* mandate grid */
-.mandate{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
-.mdt{position:relative;background:var(--panel);border:var(--border);border-radius:18px;padding:26px 24px;transition:transform .5s var(--ease),border-color .4s,background .5s;overflow:hidden}
-.mdt:hover{transform:translateY(-5px);border-color:rgba(138,182,255,.3);background:var(--panel2)}
-.mdt .n{font-family:var(--font-d);font-size:12px;letter-spacing:.2em;color:var(--gold);margin-bottom:12px;display:block}
-.mdt p{font-size:14.5px;color:var(--muted)}
-.mdt:hover p{color:var(--text)}
-.mdt::after{content:"";position:absolute;bottom:0;left:0;height:2px;width:100%;background:var(--grad);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
-.mdt:hover::after{transform:scaleX(1)}
-
-/* departments */
-.depts{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:56px}
-.dept{background:var(--panel);border:var(--border);border-radius:18px;padding:30px 24px;transition:transform .5s var(--ease),border-color .4s,box-shadow .5s;position:relative}
-.dept:hover{transform:translateY(-6px);border-color:rgba(255,210,77,.4);box-shadow:0 18px 46px rgba(0,0,0,.4)}
-.dept .glyph{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;border:var(--border);background:linear-gradient(140deg,rgba(59,130,246,.16),rgba(255,210,77,.1));margin-bottom:18px;font-family:var(--font-d);font-weight:700;color:var(--gold);font-size:18px}
-.dept h3{font-family:var(--font-d);font-size:17px;margin-bottom:8px}
-.dept p{color:var(--muted);font-size:13.5px}
-.dept .alias{display:block;margin-top:12px;font-size:11px;letter-spacing:.2em;color:var(--faint);text-transform:uppercase}
-
-/* ventures cards reuse vcard w/ icon */
-.vcard .ic{position:absolute;top:30px;right:32px;width:58px;height:58px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(140deg,rgba(59,130,246,.18),rgba(255,210,77,.1));border:var(--border);transition:transform .5s var(--ease)}
-.vcard:hover .ic{transform:rotate(-8deg) scale(1.1)}
-.vcard .ic svg{width:27px;height:27px;stroke:var(--gold);fill:none;stroke-width:1.6}
-
-/* stats */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:54px}
-.stat{text-align:center;padding:42px 16px;background:var(--panel);border:var(--border);border-radius:var(--radius);position:relative;overflow:hidden;transition:transform .5s var(--ease),border-color .4s}
-.stat:hover{transform:translateY(-6px);border-color:rgba(138,182,255,.32)}
-.stat::after{content:"";position:absolute;bottom:0;left:22%;right:22%;height:2px;background:var(--grad);opacity:0;transition:opacity .4s}
-.stat:hover::after{opacity:1}
-.stat b{font-family:var(--font-d);font-size:clamp(40px,4.6vw,60px);font-weight:700;display:block;line-height:1.08;background:var(--grad);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.stat span{color:var(--muted);font-size:12.5px;letter-spacing:.18em;text-transform:uppercase}
-
-/* founder */
-.founder{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(34px,6vw,90px);align-items:center}
-.founder .mark{position:relative;border-radius:30px;overflow:hidden;border:var(--border);background:var(--bg);clip-path:inset(8% 8% 8% 8% round 26px);transition:clip-path 1.2s var(--ease)}
-.founder .mark.in{clip-path:inset(0 0 0 0 round 30px)}
-.founder .mark img{width:100%;opacity:.9;transform:scale(1.18);transition:transform 1.4s var(--ease)}
-.founder .mark.in img{transform:scale(1)}
-.founder .frame{position:absolute;inset:18px;border:1px solid rgba(255,255,255,.15);border-radius:16px;pointer-events:none}
-.founder blockquote{font-family:var(--font-d);font-size:clamp(21px,2.5vw,29px);line-height:1.45;border-left:3px solid;border-image:var(--grad) 1;padding-left:28px;margin:30px 0 28px;font-weight:500}
-.founder .who{display:flex;align-items:center;gap:16px;margin-top:32px}
-.founder .who img{width:54px;height:54px;border-radius:50%;border:1px solid rgba(255,210,77,.45)}
-.founder .who b{font-family:var(--font-d);display:block;font-size:17px}
-.founder .who span{color:var(--muted);font-size:13.5px}
-.founder .bio{color:var(--muted);font-size:15.5px}
-.founder .bio strong{color:var(--gold)}
-
-/* cta */
-.cta-box{text-align:center;padding:clamp(64px,10vw,120px) clamp(20px,6vw,80px);border-radius:34px;position:relative;overflow:hidden;border:var(--border);background:radial-gradient(130% 150% at 50% -25%,rgba(59,130,246,.18),rgba(5,5,5,0) 55%),var(--panel)}
-.cta-box::before{content:"";position:absolute;top:-2px;left:28%;right:28%;height:2px;background:var(--grad)}
-.cta-box .sub{margin:0 auto 46px}
-.cta-box .hero-btns{justify-content:center}
-.cta-contact{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:30px}
-.cta-contact a{display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:999px;border:var(--border);background:rgba(255,255,255,.03);color:var(--muted);font-size:14px;transition:.35s}
-.cta-contact a:hover{color:#fff;border-color:rgba(138,182,255,.55);box-shadow:0 0 28px rgba(59,130,246,.16);transform:translateY(-3px)}
-
-/* footer */
-footer{position:relative;z-index:1;border-top:var(--border);padding:60px clamp(20px,6vw,90px) 44px;max-width:1280px;margin:0 auto}
-footer .wordmark{font-family:var(--font-d);font-weight:700;font-size:clamp(64px,14.5vw,210px);letter-spacing:.02em;line-height:.9;background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.015));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;user-select:none;margin-bottom:34px;transition:background .6s}
-footer .wordmark:hover{background:linear-gradient(180deg,rgba(138,182,255,.35),rgba(255,210,77,.06));-webkit-background-clip:text;background-clip:text}
-footer .fmotto{text-align:center;font-family:var(--font-s);font-style:italic;color:var(--gold);font-size:clamp(16px,2vw,21px);margin-bottom:38px}
-footer .row{display:flex;justify-content:space-between;align-items:center;gap:26px;flex-wrap:wrap}
-footer p{color:var(--faint);font-size:13.5px}
-footer .fbrand{display:flex;align-items:center;gap:11px}
-footer .fbrand img{width:30px;height:30px;border-radius:8px}
-
-/* responsive */
-@media(max-width:960px){
-  .nav-links{position:fixed;top:0;right:0;bottom:0;width:min(80vw,340px);background:rgba(6,6,9,.97);backdrop-filter:blur(26px);flex-direction:column;justify-content:center;padding:0 46px;gap:32px;transform:translateX(102%);transition:transform .6s var(--ease);border-left:var(--border);z-index:155}
-  .nav-links.open{transform:none}
-  .nav-links a{font-size:23px;font-family:var(--font-d)}
-  #burger{display:flex}
-  .nav-cta{display:none}
-  .hero-visual{opacity:.22;right:-28vw;top:26vh;width:80vw}
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .mandate{grid-template-columns:1fr}
-  .depts{grid-template-columns:repeat(2,1fr)}
-  .vm{grid-template-columns:1fr}
-  .founder{grid-template-columns:1fr}
-  .vcard{grid-template-columns:1fr}
-  .vcard .bigletter{font-size:clamp(64px,20vw,110px)}
-  .vcard .ic{position:static;margin-bottom:22px}
-  .aurora{opacity:.5}
-  .stack .sp{top:calc(76px + var(--i)*10px)}
-}
-@media(max-width:620px){.hero h1{font-size:clamp(42px,12vw,64px)}.depts{grid-template-columns:1fr}}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
-  .hero .mask>span,.hero .lead,.hero .motto,.hero .hero-btns{transform:none;opacity:1}
-  .rv,.mask>span{opacity:1!important;transform:none!important}
-  .mani p .w{opacity:1}
-}
 </style>
 </head>
 <body>
@@ -287,6 +44,21 @@ footer .fbrand img{width:30px;height:30px;border-radius:8px}
   <div class="bar"><i id="ldBar"></i></div>
   <div class="pct" id="ldPct">0%</div>
 </div>
+<style>
+#loader{position:fixed;inset:0;background:#050505;z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:26px;transition:clip-path 1.1s cubic-bezier(.22,1,.36,1)}
+#loader.lift{clip-path:inset(0 0 100% 0)}
+#loader .word{display:flex;overflow:hidden}
+#loader .word span{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(40px,9vw,88px);letter-spacing:.06em;display:inline-block;transform:translateY(115%);animation:lup .9s cubic-bezier(.22,1,.36,1) forwards}
+#loader .word span:nth-child(2){animation-delay:.07s;color:#8AB6FF}
+#loader .word span:nth-child(3){animation-delay:.14s;color:#8B5CF6}
+#loader .word span:nth-child(4){animation-delay:.21s;color:#FFD24D}
+@keyframes lup{to{transform:none}}
+#loader .motto{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(15px,2vw,19px);color:#FFD24D;opacity:0;animation:fadeIn 1.2s .8s forwards}
+@keyframes fadeIn{to{opacity:.9}}
+#loader .pct{font-family:'Space Grotesk',sans-serif;font-size:13px;letter-spacing:.5em;color:#5B6470}
+#loader .bar{width:min(240px,40vw);height:1.5px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+#loader .bar i{display:block;height:100%;width:0;background:linear-gradient(120deg,#3B82F6,#8B5CF6,#FFD24D);transition:width .2s linear}
+</style>
 
 <div id="prog"></div>
 <div id="grain"></div>
@@ -298,11 +70,11 @@ footer .fbrand img{width:30px;height:30px;border-radius:8px}
 <nav id="nav">
   <a class="brand" href="#top"><img src="https://media.base44.com/images/public/6a3e59929cb482183c6b0370/cd534934d_generated_image.png" alt="MUTYINT logo"><b>MUTYINT</b></a>
   <div class="nav-links" id="navLinks">
-    <a href="#welcome">Welcome</a>
-    <a href="#thename">The Name</a>
-    <a href="#mandate">Mandate</a>
-    <a href="#ventures">Ventures</a>
-    <a href="#founder">Founder</a>
+    <a href="index.html" class="active">Home</a>
+    <a href="the-name.html">The Name</a>
+    <a href="vision-mission.html">Vision &amp; Mission</a>
+    <a href="departments.html">Departments</a>
+    <a href="ventures.html">Ventures</a>
     <a href="#contact">Join us</a>
   </div>
   <button class="nav-cta" data-goto="#contact">Join the movement</button>
@@ -320,7 +92,7 @@ footer .fbrand img{width:30px;height:30px;border-radius:8px}
   <div class="motto motto-line">“Apud Drum Dominia Posibilia Sunt” — With God, all things are possible.</div>
   <p class="lead">You are welcome to this great platform of special people with rare talents and gifts — a home for everyone who can <strong>create something out of nothing</strong>.</p>
   <div class="hero-btns">
-    <button class="btn primary" data-goto="#thename">Discover the name</button>
+    <button class="btn primary" data-goto="#explore">Explore the platform</button>
     <button class="btn ghost" data-goto="#contact">Join the movement</button>
   </div>
   <div class="scroll-hint">Scroll</div>
@@ -340,70 +112,15 @@ footer .fbrand img{width:30px;height:30px;border-radius:8px}
   </div>
 </section>
 
-<section id="thename">
-  <span class="eyebrow rv">The Name</span>
-  <h2 class="m2"><span class="mask"><span>Five letters.</span></span><span class="mask"><span class="grad-text">One identity.</span></span></h2>
-  <p class="sub rv d2">Every letter of MUTYINT carries a calling — and a goal we live by.</p>
-  <div class="stack">
-    <div class="sp" style="--i:0"><div class="vcard" data-tilt><div class="bigletter">M</div><div><div class="num">LETTER 01 — THE GOAL OF CAPACITY</div><h3>Multi-purpose</h3><p>Every human on earth has different capacities. There is an inherent, in-built capacity in you, totally versatile — the ability to hold different skills and purposes at once. We are expected, as individuals, to develop that skill and capability in a redefined way.</p><div class="chips"><span class="chip">Capacity</span><span class="chip gold">Many skills, one person</span></div></div></div></div>
-    <div class="sp" style="--i:1"><div class="vcard" data-tilt><div class="bigletter">T</div><div><div class="num">LETTER 02 — THE GOAL OF GIFTEDNESS</div><h3>Talented</h3><p>Every human is born with different talents, unique in nature. But talent cannot manifest fully if it is not nurtured and trained to be effective and productive. Here, gifts are discovered, sharpened and put to work.</p><div class="chips"><span class="chip">Gifted</span><span class="chip gold">Nurture &amp; train</span></div></div></div></div>
-    <div class="sp" style="--i:2"><div class="vcard" data-tilt><div class="bigletter">Y</div><div><div class="num">LETTER 03 — THE GOAL OF VIBRANCE</div><h3>Young</h3><p>To be young is to be vibrant, strong, agile and full of potentials — the season of engaging yourself in different opportunities. Being young gives you strength, energy, capability and capacity; purpose, opportunities, freedom, space and time.</p><div class="chips"><span class="chip">Vibrant</span><span class="chip gold">Strength &amp; opportunity</span></div></div></div></div>
-    <div class="sp" style="--i:3"><div class="vcard" data-tilt><div class="bigletter">I</div><div><div class="num">LETTER 04 — THE GOAL OF CREATIVITY</div><h3>Inventors</h3><p>Humans have been tasked to create and build. Inventors are people with a developed mindset and creativeness — researchers who bring solutions to a lot of the world's problems. To invent is to research, and to research is to solve.</p><div class="chips"><span class="chip">Creativity</span><span class="chip gold">Solution finders</span></div></div></div></div>
-    <div class="sp" style="--i:4"><div class="vcard" data-tilt><div class="bigletter">T</div><div><div class="num">LETTER 05 — THE GOAL OF INFLUENCE</div><h3>Transformers</h3><p>Every individual has the mindset to turn negative things to positive. Transformers are energy banks — experienced, seasoned and nurtured. They are the game changers, bringing total development to any issue or problem.</p><div class="chips"><span class="chip">Influence</span><span class="chip gold">Game changers</span></div></div></div></div>
-  </div>
-</section>
-
-<section>
-  <span class="eyebrow rv">Vision &amp; Mission</span>
-  <h2 class="m2"><span class="mask"><span>Born to raise,</span></span><span class="mask"><span class="grad-text">built to transform.</span></span></h2>
-  <div class="vm">
-    <div class="panel v rv d1"><div class="k">Our Vision</div><h3>People of exceptional value</h3><p>To raise people who have great capacity for problem solving — and become people of exceptional value and character.</p></div>
-    <div class="panel m rv d2"><div class="k">Our Mission</div><h3>Development &amp; empowerment</h3><p>The development and empowerment of men and women with skills and godly values — building a new world of development and greater achievement through transformation.</p></div>
-  </div>
-</section>
-
-<section id="mandate">
-  <span class="eyebrow rv">The Mandate</span>
-  <h2 class="m2"><span class="mask"><span>Solution finders for</span></span><span class="mask"><span class="grad-text">families, cities &amp; nations.</span></span></h2>
-  <div class="mandate">
-    <div class="mdt rv d1"><span class="n">01</span><p>Serve as Transformers and Problem Solvers — solution finders for the family, cities, villages, countries and nations.</p></div>
-    <div class="mdt rv d1"><span class="n">02</span><p>Educate, imbue and impact individuals.</p></div>
-    <div class="mdt rv d1"><span class="n">03</span><p>Set people free from all sorts of addiction.</p></div>
-    <div class="mdt rv d2"><span class="n">04</span><p>Serve as Goal Setters — and Goal Achievers.</p></div>
-    <div class="mdt rv d2"><span class="n">05</span><p>Bring total transformation in the seven spheres of influence.</p></div>
-    <div class="mdt rv d2"><span class="n">06</span><p>Gather people of positive mindset who bring total change to society.</p></div>
-    <div class="mdt rv d3"><span class="n">07</span><p>Root out the tares among the wheat.</p></div>
-    <div class="mdt rv d3"><span class="n">08</span><p>Expose every form of evil.</p></div>
-    <div class="mdt rv d3"><span class="n">09</span><p>Give arms and provisions to the needy and the less privileged.</p></div>
-    <div class="mdt rv d4"><span class="n">10</span><p>Serve as battle axes to root out the evil in the land.</p></div>
-    <div class="mdt rv d4"><span class="n">11</span><p>Bring new development strategies and inventions.</p></div>
-    <div class="mdt rv d4"><span class="n">12</span><p>Raise people of exemplary life and great standards — providing ideas, counsel and knowledge.</p></div>
-  </div>
-</section>
-
-<section>
-  <span class="eyebrow rv">Departments</span>
-  <h2 class="m2"><span class="mask"><span>Five engines,</span></span><span class="mask"><span class="grad-text">one assignment.</span></span></h2>
-  <div class="depts">
-    <div class="dept rv d1"><div class="glyph">E</div><h3>Engine Room</h3><p>The core — where ideas ignite and work is forged.</p><span class="alias">EGSIN</span></div>
-    <div class="dept rv d1"><div class="glyph">G</div><h3>Goal Setters</h3><p>Turning vision into goals, and goals into results.</p><span class="alias">Eggint</span></div>
-    <div class="dept rv d2"><div class="glyph">S</div><h3>Society</h3><p>Serving communities, cities and nations with transformation.</p><span class="alias">Outreach</span></div>
-    <div class="dept rv d2"><div class="glyph">I</div><h3>Influencers</h3><p>Shaping culture across the seven spheres of influence.</p><span class="alias">Culture</span></div>
-    <div class="dept rv d3"><div class="glyph">T</div><h3>Inventors &amp; Transformers</h3><p>The builders and the change agents of the movement.</p><span class="alias">Build &amp; Change</span></div>
-  </div>
-</section>
-
-<section id="ventures">
-  <span class="eyebrow rv">Proof of Invention</span>
-  <h2 class="m2"><span class="mask"><span>Created out of nothing —</span></span><span class="mask"><span class="grad-text">six live systems.</span></span></h2>
-  <p class="sub rv d2">Invention is our culture. These are real MUTYINT-built products — deployed, billing and serving users today.</p>
-  <div class="stack">
-    <div class="sp" style="--i:0"><div class="vcard" data-tilt><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5L19 19M19 5l-2.5 2.5M7.5 16.5L5 19"/></svg></div><div><div class="num">01 — AI AUTOMATION</div><h3>S.T.E.W Agent</h3><p>An enterprise AI platform — autonomous agents, Mixture-of-Agents orchestration, vision, voice, research and a public API with a generous free tier.</p><div class="chips"><span class="chip">AI Agents</span><span class="chip">Public API</span><span class="chip">WhatsApp</span></div></div></div></div>
-    <div class="sp" style="--i:1"><div class="vcard" data-tilt><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2L20 6v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M12 8v6M9.5 11h5"/></svg></div><div><div class="num">02 — FINTECH</div><h3>PropelPay</h3><p>AI proposals, e-signatures and invoicing with automated payment chasing — plus a public REST API and MCP server for integration anywhere.</p><div class="chips"><span class="chip">Paystack</span><span class="chip">MCP Server</span><span class="chip">Invoicing</span></div></div></div></div>
-    <div class="sp" style="--i:2"><div class="vcard" data-tilt><div class="ic"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v11"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="15" r="3"/></svg></div><div><div class="num">03 — CREATIVE AI</div><h3>Shazam AI</h3><p>A creative AI studio on Telegram — images, voice, video, research and code — powered by a resilient multi-provider fallback engine and coin economy.</p><div class="chips"><span class="chip">Telegram</span><span class="chip">Voice &amp; Video</span><span class="chip">Fallbacks</span></div></div></div></div>
-    <div class="sp" style="--i:3"><div class="vcard" data-tilt><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></div><div><div class="num">04 — PRODUCTIVITY</div><h3>Slime AI</h3><p>An installable AI assistant PWA — built mobile-first for Android, with onboarding engineered to work on any device and any connection.</p><div class="chips"><span class="chip">PWA</span><span class="chip">Mobile-first</span><span class="chip">Android</span></div></div></div></div>
-    <div class="sp" style="--i:4"><div class="vcard" data-tilt><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.6L21 11l-6.4 2.4L12 20l-2.6-6.6L3 11l6.4-2.4z"/></svg></div><div><div class="num">05 — BRAND</div><h3>Erogian</h3><p>A premium personal brand for high-end AI content, design and software — with a live AI chatbot and real-time lead capture straight to WhatsApp.</p><div class="chips"><span class="chip">Design</span><span class="chip">AI Chatbot</span><span class="chip">Leads</span></div></div></div></div>
-    <div class="sp" style="--i:5"><div class="vcard" data-tilt><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5c0 2-1 3-1 5h-8c0-2-1-3-1-5a5 5 0 015-5z"/><path d="M10 17h4M11 20h2"/></svg></div><div><div class="num">06 — INTELLIGENCE</div><h3>Velora</h3><p>An ambitious AI-agent venture in active development — the next step on the MUTYINT intelligence roadmap.</p><div class="chips"><span class="chip">In Development</span><span class="chip">AI Agents</span></div></div></div></div>
+<section id="explore">
+  <span class="eyebrow rv">The Platform</span>
+  <h2 class="m2"><span class="mask"><span>Everything written,</span></span><span class="mask"><span class="grad-text">made alive.</span></span></h2>
+  <p class="sub rv d2">Each part of the MUTYINT document has its own world on this site. Step in.</p>
+  <div class="chapters">
+    <a class="chap rv d1" href="the-name.html"><span class="n">CHAPTER 01</span><span class="glyph">MTY</span><h3>The Name &amp; Five Goals</h3><p>M, T, Y, I, T — what each letter means, the capacity, giftedness, vibrance, creativity and influence behind the name.</p><span class="go">Enter the name →</span></a>
+    <a class="chap rv d1" href="vision-mission.html"><span class="n">CHAPTER 02</span><span class="glyph">VM</span><h3>Vision, Mission &amp; Mandate</h3><p>Raising people of exceptional value — and the twelve-pillar mandate to transform families, cities, villages, countries and nations.</p><span class="go">Read the mandate →</span></a>
+    <a class="chap rv d2" href="departments.html"><span class="n">CHAPTER 03</span><span class="glyph">5</span><h3>The Departments</h3><p>Engine Room (EGSIN), Goal Setters (Eggint), Society, Influencers, and Inventors &amp; Transformers — five engines, one assignment.</p><span class="go">Meet the engines →</span></a>
+    <a class="chap rv d2" href="ventures.html"><span class="n">CHAPTER 04</span><span class="glyph">◆</span><h3>Proof of Invention</h3><p>Six live systems built by the movement — from AI agents to fintech. Real products, deployed, billing and serving users.</p><span class="go">See the inventions →</span></a>
   </div>
 </section>
 
@@ -412,14 +129,14 @@ footer .fbrand img{width:30px;height:30px;border-radius:8px}
   <h2 class="m2"><span class="mask"><span>Momentum,</span></span><span class="mask"><span class="grad-text">measured.</span></span></h2>
   <div class="stats">
     <div class="stat rv d1"><b data-count="6">0</b><span>Live inventions</span></div>
-    <div class="stat rv d2"><b data-count="12" data-suffix="">0</b><span>Mandate pillars</span></div>
+    <div class="stat rv d2"><b data-count="12">0</b><span>Mandate pillars</span></div>
     <div class="stat rv d3"><b data-count="7">0</b><span>Spheres of influence</span></div>
     <div class="stat rv d4"><b data-count="1" data-suffix=" → ∞">0</b><span>Mission ambition</span></div>
   </div>
 </section>
 
 <section class="founder" id="founder">
-  <div class="mark" id="fmark"><img id="fimg" src="https://media.base44.com/images/public/6a3e59929cb482183c6b0370/16f58689c_generated_image.png" alt="MUTYINT visual"><div class="frame"></div></div>
+  <div class="mark"><img src="https://media.base44.com/images/public/6a3e59929cb482183c6b0370/16f58689c_generated_image.png" alt="MUTYINT visual"><div class="frame"></div></div>
   <div>
     <span class="eyebrow rv">The Founder</span>
     <blockquote class="rv d1">"Invention is not a privilege of the old world. Give young talented minds a problem, and we will build the future in response."</blockquote>
@@ -456,148 +173,6 @@ footer .fbrand img{width:30px;height:30px;border-radius:8px}
   </div>
 </footer>
 
-<script>
-const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* preloader */
-(function(){
-  const bar=document.getElementById('ldBar'),pct=document.getElementById('ldPct'),ld=document.getElementById('loader');
-  let p=0;
-  const t=setInterval(()=>{
-    p=Math.min(100,p+Math.random()*17+4);
-    bar.style.width=p+'%';pct.textContent=Math.floor(p)+'%';
-    if(p>=100){clearInterval(t);setTimeout(()=>{ld.classList.add('lift');onReady();},350);}
-  },110);
-})();
-
-/* smooth scroll (Lenis) */
-let lenis=null;
-if(!RM && window.Lenis){
-  lenis=new Lenis({lerp:.09,wheelMultiplier:1,smoothWheel:true});
-  (function raf(t){lenis.raf(t);requestAnimationFrame(raf);})(0);
-  lenis.on('scroll',()=>scrollFX());
-}
-function goTo(sel){const el=document.querySelector(sel);if(!el)return;
-  if(lenis)lenis.scrollTo(el,{offset:-70,duration:1.4});
-  else el.scrollIntoView({behavior:RM?'auto':'smooth'});}
-document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>goTo(b.dataset.goto)));
-document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();goTo(a.getAttribute('href'));}));
-
-/* hero intro */
-function onReady(){
-  setTimeout(()=>document.querySelector('.hero').classList.add('play'),RM?0:150);
-  document.querySelector('.scroll-hint').classList.add('in');
-}
-
-/* nav + scroll fx */
-const nav=document.getElementById('nav');let lastY=0;
-function scrollFX(){
-  const y=scrollY;
-  nav.classList.toggle('scrolled',y>40);
-  if(y>lastY&&y>420&&!document.getElementById('navLinks').classList.contains('open'))nav.classList.add('hide');
-  else nav.classList.remove('hide');
-  lastY=y;
-  const h=document.documentElement.scrollHeight-innerHeight;
-  document.getElementById('prog').style.width=(h>0?y/h*100:0)+'%';
-  document.querySelector('.a1').style.transform=`translateY(${y*.08}px)`;
-  document.querySelector('.a2').style.transform=`translateY(${y*-.05}px)`;
-  const hv=document.getElementById('heroVisual');
-  if(hv&&y<innerHeight*1.2){hv.style.transform=`translateY(${y*.14}px) scale(${1+y*.00006})`;}
-  lightWords();
-}
-addEventListener('scroll',()=>{if(!lenis)scrollFX();},{passive:true});
-scrollFX();
-
-/* mobile menu */
-const burger=document.getElementById('burger'),links=document.getElementById('navLinks');
-burger.addEventListener('click',()=>{burger.classList.toggle('open');links.classList.toggle('open');});
-links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{burger.classList.remove('open');links.classList.remove('open');}));
-
-/* reveals */
-const io=new IntersectionObserver(es=>es.forEach(e=>{
-  if(e.isIntersecting){
-    e.target.classList.add('in');
-    const p=e.target.closest('h2');if(p)p.classList.add('in');
-    io.unobserve(e.target);
-  }
-}),{threshold:.15,rootMargin:'0px 0px -40px 0px'});
-document.querySelectorAll('.rv').forEach(el=>io.observe(el));
-document.querySelectorAll('h2.m2').forEach(el=>io.observe(el));
-const mio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');mio.unobserve(e.target);}}),{threshold:.25});
-mio.observe(document.getElementById('fmark'));
-
-/* scroll-lit words */
-const manis=[...document.querySelectorAll('.mani-p')];
-manis.forEach(p=>{
-  const walk=node=>{
-    [...node.childNodes].forEach(ch=>{
-      if(ch.nodeType===3){
-        const frag=document.createDocumentFragment();
-        ch.textContent.split(/\s+/).filter(Boolean).forEach(word=>{
-          const s=document.createElement('span');s.className='w';s.textContent=word;frag.appendChild(s);frag.appendChild(document.createTextNode(' '));
-        });
-        node.replaceChild(frag,ch);
-      }else if(ch.nodeType===1&&ch.tagName!=='BR')walk(ch);
-    });
-  };
-  walk(p);
-});
-function lightWords(){
-  if(RM){document.querySelectorAll('.mani .w').forEach(w=>w.classList.add('lit'));return;}
-  manis.forEach(p=>{
-    const r=p.getBoundingClientRect();
-    const prog=Math.min(1,Math.max(0,(innerHeight*.85-r.top)/(r.height+innerHeight*.35)));
-    const ws=p.querySelectorAll('.w'),n=Math.floor(ws.length*prog);
-    ws.forEach((w,i)=>w.classList.toggle('lit',i<n));
-  });
-}
-
-/* counters */
-const cio=new IntersectionObserver(es=>es.forEach(e=>{
-  if(!e.isIntersecting)return;const el=e.target,target=+el.dataset.count,suf=el.dataset.suffix||'';let t0=null;
-  const step=ts=>{if(!t0)t0=ts;const p=Math.min((ts-t0)/1500,1);
-    el.firstChild.textContent=Math.round(target*(1-Math.pow(1-p,3)))+suf;
-    if(p<1)requestAnimationFrame(step);};
-  requestAnimationFrame(step);cio.unobserve(el);
-}),{threshold:.6});
-document.querySelectorAll('[data-count]').forEach(el=>{const hold=document.createElement('span');el.insertBefore(hold,el.firstChild);cio.observe(el);});
-
-/* 3D tilt cards */
-if(matchMedia('(hover:hover)').matches&&!RM){
-  document.querySelectorAll('[data-tilt]').forEach(c=>{
-    let raf;
-    c.addEventListener('pointermove',e=>{
-      const r=c.getBoundingClientRect(),px=(e.clientX-r.left)/r.width-.5,py=(e.clientY-r.top)/r.height-.5;
-      c.style.setProperty('--mx',(px+.5)*r.width+'px');c.style.setProperty('--my',(py+.5)*r.height+'px');
-      cancelAnimationFrame(raf);
-      raf=requestAnimationFrame(()=>{c.style.transform=`perspective(1100px) rotateY(${px*5}deg) rotateX(${-py*5}deg) translateY(-2px)`;});
-    });
-    c.addEventListener('pointerleave',()=>{cancelAnimationFrame(raf);c.style.transition='transform .7s var(--ease)';c.style.transform='';setTimeout(()=>c.style.transition='',700);});
-  });
-}
-
-/* magnetic buttons */
-if(matchMedia('(hover:hover)').matches&&!RM){
-  document.querySelectorAll('.btn').forEach(b=>{
-    b.addEventListener('pointermove',e=>{
-      const r=b.getBoundingClientRect(),dx=(e.clientX-r.left-r.width/2)*.22,dy=(e.clientY-r.top-r.height/2)*.3;
-      b.style.transform=`translate(${dx}px,${dy}px)`;
-    });
-    b.addEventListener('pointerleave',()=>{b.style.transform='';});
-  });
-}
-
-/* custom cursor */
-if(matchMedia('(hover:hover) and (pointer:fine)').matches){
-  const cur=document.getElementById('cur'),dot=document.getElementById('curDot');
-  let mx=innerWidth/2,my=innerHeight/2,cx=mx,cy=my;
-  addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;dot.style.transform=`translate(${mx}px,${my}px)`;});
-  (function loop(){cx+=(mx-cx)*.14;cy+=(my-cy)*.14;cur.style.transform=`translate(${cx}px,${cy}px)`;requestAnimationFrame(loop);})();
-  document.querySelectorAll('a,button,.vcard,.mdt,.dept').forEach(el=>{
-    el.addEventListener('pointerenter',()=>cur.classList.add('big'));
-    el.addEventListener('pointerleave',()=>cur.classList.remove('big'));
-  });
-}
-</script>
+<script src="site.js"></script>
 </body>
 </html>
