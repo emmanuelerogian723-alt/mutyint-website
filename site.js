@@ -1,13 +1,41 @@
 /* MUTYINT — shared site behavior */
+/* ---------- 1) PRELOADER: runs first, independent of everything else, always completes ---------- */
+(function(){
+  const ld=document.getElementById('loader');
+  if(!ld){return;}
+  const bar=document.getElementById('ldBar'),pct=document.getElementById('ldPct');
+  let p=0,done=false;
+  function finish(){
+    if(done)return;done=true;
+    clearInterval(t);clearTimeout(safety);
+    if(bar)bar.style.width='100%';if(pct)pct.textContent='100%';
+    setTimeout(()=>{ld.classList.add('lift');},200);
+  }
+  const t=setInterval(()=>{
+    p=Math.min(100,p+Math.random()*17+4);
+    if(bar)bar.style.width=p+'%';if(pct)pct.textContent=Math.floor(p)+'%';
+    if(p>=100)finish();
+  },110);
+  // hard safety net: never let the loader hang more than 3.5s even if something else on the
+  // page is slow or a later script errors — the loader always lifts.
+  const safety=setTimeout(finish,3500);
+})();
+
+/* ---------- 2) EVERYTHING ELSE: wrapped so one failure can't freeze the page ---------- */
+try{
+
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* smooth scroll (Lenis) */
+/* smooth scroll (Lenis) — optional, never blocks anything if it fails to load */
 let lenis=null;
-if(!RM && window.Lenis){
-  lenis=new Lenis({lerp:.09,wheelMultiplier:1,smoothWheel:true});
-  (function raf(t){lenis.raf(t);requestAnimationFrame(raf);})(0);
-  lenis.on('scroll',()=>scrollFX());
-}
+try{
+  if(!RM && window.Lenis){
+    lenis=new Lenis({lerp:.09,wheelMultiplier:1,smoothWheel:true});
+    (function raf(t){lenis.raf(t);requestAnimationFrame(raf);})(0);
+    lenis.on('scroll',()=>scrollFX());
+  }
+}catch(e){lenis=null;}
+
 function goTo(sel){const el=document.querySelector(sel);if(!el)return;
   if(sel==='#top'){if(lenis)lenis.scrollTo(0,{duration:1.2});else scrollTo({top:0,behavior:RM?'auto':'smooth'});return;}
   if(lenis)lenis.scrollTo(el,{offset:-70,duration:1.4});
@@ -19,45 +47,61 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',
 function onReady(){
   const hero=document.querySelector('.page-hero')||document.querySelector('.hero');
   if(hero)setTimeout(()=>hero.classList.add('play'),RM?0:120);
+  const hint=document.querySelector('.scroll-hint');
+  if(hint)hint.classList.add('in');
 }
+onReady();
 
 /* nav + scroll fx */
 const nav=document.getElementById('nav');let lastY=0;
 function scrollFX(){
-  const y=scrollY;
-  nav.classList.toggle('scrolled',y>40);
-  if(y>lastY&&y>420&&!document.getElementById('navLinks').classList.contains('open'))nav.classList.add('hide');
-  else nav.classList.remove('hide');
-  lastY=y;
-  const h=document.documentElement.scrollHeight-innerHeight;
-  document.getElementById('prog').style.width=(h>0?y/h*100:0)+'%';
-  const a1=document.querySelector('.a1'),a2=document.querySelector('.a2');
-  if(a1)a1.style.transform=`translateY(${y*.08}px)`;
-  if(a2)a2.style.transform=`translateY(${y*-.05}px)`;
-  const hv=document.getElementById('heroVisual');
-  if(hv&&y<innerHeight*1.2){hv.style.transform=`translateY(${y*.14}px) scale(${1+y*.00006})`;}
-  lightWords();
+  try{
+    const y=scrollY;
+    if(nav)nav.classList.toggle('scrolled',y>40);
+    const navLinks=document.getElementById('navLinks');
+    if(nav){
+      if(y>lastY&&y>420&&!(navLinks&&navLinks.classList.contains('open')))nav.classList.add('hide');
+      else nav.classList.remove('hide');
+    }
+    lastY=y;
+    const h=document.documentElement.scrollHeight-innerHeight;
+    const prog=document.getElementById('prog');
+    if(prog)prog.style.width=(h>0?y/h*100:0)+'%';
+    const a1=document.querySelector('.a1'),a2=document.querySelector('.a2');
+    if(a1)a1.style.transform=`translateY(${y*.08}px)`;
+    if(a2)a2.style.transform=`translateY(${y*-.05}px)`;
+    const hv=document.getElementById('heroVisual');
+    if(hv&&y<innerHeight*1.2){hv.style.transform=`translateY(${y*.14}px) scale(${1+y*.00006})`;}
+    lightWords();
+  }catch(e){}
 }
 addEventListener('scroll',()=>{if(!lenis)scrollFX();},{passive:true});
 scrollFX();
 
 /* mobile menu */
 const burger=document.getElementById('burger'),links=document.getElementById('navLinks');
-burger.addEventListener('click',()=>{burger.classList.toggle('open');links.classList.toggle('open');});
-links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{burger.classList.remove('open');links.classList.remove('open');}));
+if(burger&&links){
+  burger.addEventListener('click',()=>{burger.classList.toggle('open');links.classList.toggle('open');});
+  links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{burger.classList.remove('open');links.classList.remove('open');}));
+}
 
 /* reveals */
-const io=new IntersectionObserver(es=>es.forEach(e=>{
-  if(e.isIntersecting){
-    e.target.classList.add('in');
-    const p=e.target.closest('h2');if(p)p.classList.add('in');
-    io.unobserve(e.target);
-  }
-}),{threshold:.15,rootMargin:'0px 0px -40px 0px'});
-document.querySelectorAll('.rv').forEach(el=>io.observe(el));
-document.querySelectorAll('h2.m2').forEach(el=>io.observe(el));
-const mio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');mio.unobserve(e.target);}}),{threshold:.25});
-document.querySelectorAll('.mark').forEach(el=>mio.observe(el));
+if('IntersectionObserver' in window){
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      const p=e.target.closest('h2');if(p)p.classList.add('in');
+      io.unobserve(e.target);
+    }
+  }),{threshold:.15,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+  document.querySelectorAll('h2.m2').forEach(el=>io.observe(el));
+  const mio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');mio.unobserve(e.target);}}),{threshold:.25});
+  document.querySelectorAll('.mark').forEach(el=>mio.observe(el));
+}else{
+  // no IntersectionObserver support: just show everything immediately
+  document.querySelectorAll('.rv,h2.m2,.mark').forEach(el=>el.classList.add('in'));
+}
 
 /* scroll-lit words */
 const manis=[...document.querySelectorAll('.mani-p')];
@@ -86,14 +130,16 @@ function lightWords(){
 }
 
 /* counters */
-const cio=new IntersectionObserver(es=>es.forEach(e=>{
-  if(!e.isIntersecting)return;const el=e.target,target=+el.dataset.count,suf=el.dataset.suffix||'';let t0=null;
-  const step=ts=>{if(!t0)t0=ts;const p=Math.min((ts-t0)/1500,1);
-    el.firstChild.textContent=Math.round(target*(1-Math.pow(1-p,3)))+suf;
-    if(p<1)requestAnimationFrame(step);};
-  requestAnimationFrame(step);cio.unobserve(el);
-}),{threshold:.6});
-document.querySelectorAll('[data-count]').forEach(el=>{const hold=document.createElement('span');el.insertBefore(hold,el.firstChild);cio.observe(el);});
+if('IntersectionObserver' in window){
+  const cio=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting)return;const el=e.target,target=+el.dataset.count,suf=el.dataset.suffix||'';let t0=null;
+    const step=ts=>{if(!t0)t0=ts;const p=Math.min((ts-t0)/1500,1);
+      if(el.firstChild)el.firstChild.textContent=Math.round(target*(1-Math.pow(1-p,3)))+suf;
+      if(p<1)requestAnimationFrame(step);};
+    requestAnimationFrame(step);cio.unobserve(el);
+  }),{threshold:.6});
+  document.querySelectorAll('[data-count]').forEach(el=>{const hold=document.createElement('span');el.insertBefore(hold,el.firstChild);cio.observe(el);});
+}
 
 /* 3D tilt + spotlight */
 if(matchMedia('(hover:hover)').matches&&!RM){
@@ -129,24 +175,18 @@ if(matchMedia('(hover:hover)').matches&&!RM){
 /* custom cursor */
 if(matchMedia('(hover:hover) and (pointer:fine)').matches){
   const cur=document.getElementById('cur'),dot=document.getElementById('curDot');
-  let mx=innerWidth/2,my=innerHeight/2,cx=mx,cy=my;
-  addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;dot.style.transform=`translate(${mx}px,${my}px)`;});
-  (function loop(){cx+=(mx-cx)*.14;cy+=(my-cy)*.14;cur.style.transform=`translate(${cx}px,${cy}px)`;requestAnimationFrame(loop);})();
-  document.querySelectorAll('a,button,.vcard,.chap,.deptrow,.mdrow,.lrow').forEach(el=>{
-    el.addEventListener('pointerenter',()=>cur.classList.add('big'));
-    el.addEventListener('pointerleave',()=>cur.classList.remove('big'));
-  });
+  if(cur&&dot){
+    let mx=innerWidth/2,my=innerHeight/2,cx=mx,cy=my;
+    addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;dot.style.transform=`translate(${mx}px,${my}px)`;});
+    (function loop(){cx+=(mx-cx)*.14;cy+=(my-cy)*.14;cur.style.transform=`translate(${cx}px,${cy}px)`;requestAnimationFrame(loop);})();
+    document.querySelectorAll('a,button,.vcard,.chap,.deptrow,.mdrow,.lrow').forEach(el=>{
+      el.addEventListener('pointerenter',()=>cur.classList.add('big'));
+      el.addEventListener('pointerleave',()=>cur.classList.remove('big'));
+    });
+  }
 }
 
-/* preloader (any page with #loader) */
-(function(){
-  const ld=document.getElementById('loader');
-  if(!ld){onReady();return;}
-  const bar=document.getElementById('ldBar'),pct=document.getElementById('ldPct');
-  let p=0;
-  const t=setInterval(()=>{
-    p=Math.min(100,p+Math.random()*17+4);
-    bar.style.width=p+'%';pct.textContent=Math.floor(p)+'%';
-    if(p>=100){clearInterval(t);setTimeout(()=>{ld.classList.add('lift');onReady();},350);}
-  },110);
-})();
+}catch(err){
+  // Any failure above must never keep content hidden — reveal everything as a fallback.
+  document.querySelectorAll('.rv,h2.m2,.mark,.mani .w').forEach(el=>el.classList.add('in','lit'));
+}
